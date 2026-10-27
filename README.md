@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LawPrep Tutorial Noida (clatcoachingnoida.com)
 
-## Getting Started
-
-First, run the development server:
+Sibling site of `LPT_delhi`. Next.js 16 with Cache Components, Tailwind 4, MongoDB (database `CLAT_NOIDA`), Cloudinary for images, Resend for enquiry emails.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev          # http://localhost:3000
+npm run build
+npm run copy:lpt     # copy shared reviews from the LPT_DELHI database (safe to re-run)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`npm run copy:lpt -- --with nlu-profiles,study-plans` also copies those collections **as drafts**, so nothing duplicates the Delhi site until it's been reviewed in the admin. Add `--dry-run` to preview.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Same keys as LPT Delhi: `MONGODB_URI` (must point at `CLAT_NOIDA`), `CLOUDINARY_*`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `JWT_SECRET`, `ENQUIRY_ACCESS_CODE`, `RESEND_API_KEY`, `ENQUIRY_NOTIFY_FROM`, `ENQUIRY_NOTIFY_TO`, `NEXT_PUBLIC_URL`.
+Optional: `ENQUIRY_EMAIL_ENABLED=false` stops notification emails; `ENQUIRY_EMAIL_DAILY_CAP` (default 40, since the Resend account is shared with Delhi).
 
-## Learn More
+## Admin
 
-To learn more about Next.js, take a look at the following resources:
+`/admin-login`, then `/admin`. Sections: Blogs, Current Affairs, NLU Profiles, Toppers' Strategy, Study Plans, FAQs, Reviews, Batches, and Enquiries (which also needs the 4-digit access code).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Every section is described once in `src/lib/cms/collections.ts`. That config generates the admin form, the list screen, the Mongoose schema (`src/lib/server/cms.ts`) and validation. To add a field, add it to the config; to add a section, add a config entry, then write its public page.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Drafts need only a title (and slug). Fields marked `required` must be filled to publish.
+- Saving calls `revalidateTag(<section>)`, so the public pages update on the next visit.
+- Every `/api/admin/*` route checks the admin session itself; `src/proxy.ts` only guards the admin pages.
+- Uploads go to Cloudinary under `CLAT_NOIDA/<section>`.
 
-## Deploy on Vercel
+## Where content lives
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| What | Where |
+|---|---|
+| Contact details, address, navigation | `src/lib/site.ts` |
+| Courses, CLAT 2026 Noida toppers, centre photos | `src/lib/data.ts` |
+| Faculty (same as Delhi) | `src/lib/faculty.ts` |
+| Gallery photo lists | `src/lib/gallery.ts` |
+| Everything editable by staff | the admin (MongoDB) |

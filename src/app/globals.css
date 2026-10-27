@@ -1,26 +1,212 @@
 @import "tailwindcss";
 
+/*
+  Theme: white paper, warm ink, LawPrep red for actions, LawPrep yellow for
+  highlights. Red carries every button and active state. Yellow is only ever
+  a surface behind dark text, never text on white (it fails contrast).
+*/
+@theme {
+  --color-paper: #ffffff;
+  --color-mist: #f5f4f1;
+  --color-fog: #ecebe7;
+  --color-line: #e7e5df;
+  --color-line-strong: #d4d1c9;
+
+  --color-ink: #141210;
+  --color-ink-2: #55514a;
+  --color-ink-3: #7a756c;
+
+  --color-brand: #e40014;
+  --color-brand-deep: #b3000f;
+  --color-brand-tint: #fdeced;
+
+  --color-sun: #fcc419;
+  --color-sun-deep: #e8ad00;
+  --color-sun-tint: #fff6d6;
+
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-hanken), ui-sans-serif, sans-serif;
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --shadow-card: 0 1px 2px rgb(20 18 16 / 0.04), 0 10px 30px -14px rgb(20 18 16 / 0.18);
+  --shadow-lift: 0 2px 6px rgb(20 18 16 / 0.06), 0 24px 48px -20px rgb(20 18 16 / 0.32);
+  --shadow-float: 0 12px 32px -8px rgb(20 18 16 / 0.28);
+  --shadow-brand: 0 10px 24px -8px rgb(228 0 20 / 0.55);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --tabbar-h: 4.5rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 5rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+::selection {
+  background: var(--color-sun);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* App-like touch: no callout menus or text selection on tappable chrome */
+a,
+button {
+  -webkit-touch-callout: none;
+}
+
+img {
+  -webkit-user-drag: none;
+}
+
+/* Horizontal "app rail": swipeable on touch, no visible scrollbar */
+@utility rail {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  & > * {
+    scroll-snap-align: start;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Space for the fixed mobile tab bar plus the iPhone home indicator */
+@utility pb-tabbar {
+  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+}
+
+@utility story-ring {
+  background: conic-gradient(from 210deg, var(--color-sun), var(--color-brand), var(--color-sun-deep), var(--color-brand), var(--color-sun));
+}
+
+/* Long-form article text from the CMS editor. Short measure, generous rhythm. */
+.prose-app {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--color-ink-2);
+  overflow-wrap: anywhere;
+}
+.prose-app > * + * {
+  margin-top: 1.1em;
+}
+.prose-app :is(h2, h3, h4) {
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-top: 1.8em;
+  scroll-margin-top: 5rem;
+}
+.prose-app h2 {
+  font-size: 1.55em;
+  font-weight: 700;
+}
+.prose-app h3 {
+  font-size: 1.25em;
+  font-weight: 700;
+}
+.prose-app h4 {
+  font-size: 1.05em;
+  font-weight: 700;
+}
+.prose-app strong {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+.prose-app a {
+  color: var(--color-brand);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-brand) 35%, transparent);
+  text-underline-offset: 3px;
+}
+.prose-app :is(ul, ol) {
+  padding-left: 1.3em;
+}
+.prose-app ul {
+  list-style: disc;
+}
+.prose-app ol {
+  list-style: decimal;
+}
+.prose-app li + li {
+  margin-top: 0.4em;
+}
+.prose-app li::marker {
+  color: var(--color-brand);
+}
+.prose-app blockquote {
+  border-radius: 18px;
+  background: var(--color-sun-tint);
+  padding: 1em 1.2em;
+  color: var(--color-ink);
+  font-weight: 500;
+}
+.prose-app img {
+  width: 100%;
+  height: auto;
+  border-radius: 20px;
+}
+.prose-app hr {
+  border: 0;
+  border-top: 1px solid var(--color-line);
+}
+.prose-app code {
+  border-radius: 6px;
+  background: var(--color-mist);
+  padding: 0.1em 0.35em;
+  font-size: 0.9em;
+}
+/* Tables scroll sideways on phones instead of squashing. */
+.prose-app table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.9em;
+}
+.prose-app :is(th, td) {
+  border-bottom: 1px solid var(--color-line);
+  padding: 0.6em 0.9em;
+  text-align: left;
+  vertical-align: top;
+}
+.prose-app th {
+  background: var(--color-mist);
+  color: var(--color-ink);
+  font-weight: 700;
+}
+@media (min-width: 768px) {
+  .prose-app {
+    font-size: 18px;
+  }
 }
